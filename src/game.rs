@@ -16,6 +16,7 @@ pub struct Game {
     pub gl: GlGraphics,
     pub window: Window,
     pub player: Player,
+    pub right_player: Player,
     window_size: u32,
     pixel_size: f64,
     world_size: u32,
@@ -38,7 +39,8 @@ impl Game {
         Game {
             gl,
             window,
-            player: Player::new(0.0, 0.0),
+            player: Player::new("Nicolas", 0.0, 0.0, 1),
+            right_player: Player::new("Joaozinho", window_size as f64 - pixel_size, 0.0, -1),
             window_size,
             pixel_size,
             world_size: window_size / pixel_size as u32,
@@ -48,10 +50,23 @@ impl Game {
     pub fn render(&mut self, args: &RenderArgs) {
         self.create_map(&args);
 
+        for projectile in self.player.projectiles.iter_mut() {
+            projectile.render(&mut self.gl, &args);
+        }
+
+        for projectile in self.right_player.projectiles.iter_mut() {
+            projectile.render(&mut self.gl, &args);
+        }
+
         self.player.render(&mut self.gl, &args);
+        self.right_player.render(&mut self.gl, &args);
     }
 
-    pub fn update(&mut self, args: &UpdateArgs) {}
+    pub fn update(&mut self, args: &UpdateArgs) {
+        self.player.remove_projectiles(&self.window_size);
+        self.right_player.remove_projectiles(&self.window_size);
+    }
+
     pub fn create_map(&mut self, args: &RenderArgs) {
         use graphics::*;
 
